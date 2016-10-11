@@ -1,13 +1,15 @@
 require Integer
-alias Whatsupwith.Parallel
+alias Whatsupwith.{Parallel, Program}
 
 defmodule Whatsupwith.FindExecutables do
   def from_directory(dir) do
     case File.ls(dir) do
       {:ok, files} ->
         files
-        |> Enum.map(&({Path.join(dir, &1), &1}))
-        |> Enum.filter(fn {p, _} -> executable_file?(p) end)
+        |> Enum.map(fn name ->
+          %Program{name: name, path: Path.join(dir, name)}
+        end)
+        |> Enum.filter(fn prog -> executable_file?(prog.path) end)
       _ -> []
     end
   end
@@ -15,7 +17,7 @@ defmodule Whatsupwith.FindExecutables do
   defp executable_file?(path) do
     case File.stat(path) do
       {:ok, stat} -> executable_file_mode?(stat.mode)
-      other -> false
+      _ -> false
     end
   end
 
