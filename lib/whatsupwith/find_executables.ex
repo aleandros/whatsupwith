@@ -1,7 +1,22 @@
-require Integer
-alias Whatsupwith.{Parallel, Program}
-
 defmodule Whatsupwith.FindExecutables do
+  @moduledoc """
+  Exposes and contains implementation
+  for finding programs in a given directory.
+
+  A program is a considered to be a regular
+  file in which any of the number of its
+  permissions is odd.
+  """
+  require Integer
+  alias Whatsupwith.Program
+
+  @doc """
+  Given a directory, return
+  a list of `Whatsupwith.Program` structs.
+
+  In case of an error reading the directory,
+  an empty list is returned.
+  """
   def from_directory(dir) do
     case File.ls(dir) do
       {:ok, files} ->
