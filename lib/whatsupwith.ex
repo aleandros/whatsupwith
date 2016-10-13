@@ -3,7 +3,7 @@ defmodule Whatsupwith do
   Logic for inspecting information about
   program names.
   """
-  alias Whatsupwith.{FindExecutables, Format}
+  alias Whatsupwith.{FindExecutables, Format, Filter}
 
   @doc """
   Program entrypoint.
@@ -12,15 +12,25 @@ defmodule Whatsupwith do
   arguments and displays them in the appropriate
   format.
   """
-  def main(_args) do
+  def main([]) do
     list_programs
     |> Format.tabular_format
     |> IO.puts
   end
+  def main(argv) do
+    case configuration(argv) do
+      {[strategy: strategy, property: property], target} ->
+        list_programs
+        |> Filter.search(property, target, strategy)
+        |> Format.tabular_format
+        |> IO.puts
+      _ -> IO.puts("Invalid options")
+    end
+  end
 
   @doc """
   Function in charge of fetching all program
-  information from the PATH environment variable.
+  information fromAdd ta the PATH environment variable.
   """
   def list_programs do
     System.get_env("PATH")
@@ -28,5 +38,23 @@ defmodule Whatsupwith do
     |> MapSet.new
     |> Enum.map(&FindExecutables.from_directory/1)
     |> Enum.concat
+  end
+
+  defp configuration(argv) do
+    switches = [strategy: :string,
+                property: :string]
+    case OptionParser.parse(argv, switches: switches) do
+      {parsed, remaining, []} -> handleparsed(parsed, remaining)
+      _ -> :error
+    end
+  end
+
+  defp handleparsed(_, []), do: :error
+  defp handleparsed(parsed, [arg|_]) do
+    strategy = Keyword.get(parsed, :strategy, "substring")
+    |> String.to_atom
+    property = Keyword.get(parsed, :property, "name")
+    |> String.to_atom
+    {[strategy: strategy, property: property], arg}
   end
 end
