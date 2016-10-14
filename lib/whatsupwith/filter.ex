@@ -23,7 +23,8 @@ defmodule Whatsupwith.Filter do
   defp predicate(:exact, property, string), do: test_fn(property, string, &==/2)
   defp predicate(:substring, property, sub), do: test_fn(property, sub, &contains?/2)
   defp predicate(:match, property, regex) do
-    test_fn(property, regex, fn(prop, target) ->
+    {:ok, compiled_regex} = Regex.compile(regex)
+    test_fn(property, compiled_regex, fn(prop, target) ->
       Regex.match?(target, prop)
     end)
   end
