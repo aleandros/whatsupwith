@@ -33,7 +33,8 @@ defmodule Whatsupwith do
   information fromAdd ta the PATH environment variable.
   """
   def list_programs do
-    System.get_env("PATH")
+    "PATH"
+    |> System.get_env
     |> String.split(":")
     |> MapSet.new
     |> Enum.map(&FindExecutables.from_directory/1)
@@ -51,9 +52,11 @@ defmodule Whatsupwith do
 
   defp handleparsed(_, []), do: :error
   defp handleparsed(parsed, [arg|_]) do
-    strategy = Keyword.get(parsed, :strategy, "substring")
+    strategy = parsed
+    |> Keyword.get(:strategy, "substring")
     |> String.to_atom
-    property = Keyword.get(parsed, :property, "name")
+    property = parsed
+    |> Keyword.get(:property, "name")
     |> String.to_atom
     {[strategy: strategy, property: property], arg}
   end
